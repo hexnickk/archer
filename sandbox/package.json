@@ -1,0 +1,27 @@
+{
+  "name": "sandbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "start": "casperjs sandbox.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kozlovzxc/archer.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kozlovzxc/archer/issues"
+  },
+  "homepage": "https://github.com/kozlovzxc/archer#readme",
+  "dependencies": {
+    "casperjs": "^1.1.4",
+    "phantomjs": "^2.1.7"
+  },
+  "devDependencies": {
+    "eslint": "^4.17.0"
+  }
+}
