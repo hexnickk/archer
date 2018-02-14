@@ -1,8 +1,9 @@
 const casper = require('casper').create();
 casper.options.viewportSize = { width: 1920, height: 1080 };
 
-function Report(url, message){
+function Report(url, cookies, message){
     this.url = url;
+    this.cookies = cookies;
     this.message = message;
 }
 
@@ -17,6 +18,7 @@ const reports = [];
 casper.on('remote.alert', function(message) {
     reports.push(new Report(
         this.getCurrentUrl(),
+        this.page.cookies,
         message
     ));
 });
