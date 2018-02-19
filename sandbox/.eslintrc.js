@@ -2,6 +2,9 @@ module.exports = {
     "env": {
         "node": true
     },
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
     "extends": "eslint:recommended",
     "rules": {
         "indent": [
@@ -21,7 +24,8 @@ module.exports = {
             "always"
         ],
         "no-console": [
-            "allow"
+            "warn",
+            { allow: [ "warn", "error"] }
         ]
     }
 };
