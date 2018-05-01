@@ -1,4 +1,3 @@
-const parse = require('url-parse');
 const casper = require('casper').create();
 casper.options.viewportSize = { width: 1920, height: 1080 };
 
@@ -11,9 +10,6 @@ function report(url, cookies, message){
 }
 
 function main(args) {
-  const url = parse(args[0], true);
-  console.log(JSON.stringify(url));
-
   const target = args[0];
   const reports = [];
 
