@@ -19,7 +19,8 @@
   "homepage": "https://github.com/kozlovzxc/archer#readme",
   "dependencies": {
     "casperjs": "^1.1.4",
-    "phantomjs": "^2.1.7"
+    "phantomjs": "^2.1.7",
+    "url-parse": "^1.4.0"
   },
   "devDependencies": {
     "eslint": "^4.17.0"
