@@ -1,27 +1,26 @@
 {
-  "name": "sandbox",
+  "name": "archer",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "archer.js",
   "scripts": {
-    "build": "webpack",
-    "start": "casperjs sandbox.js"
+    "lint": "eslint src",
+    "start": "node src/index.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kozlovzxc/archer.git"
   },
-  "author": "",
+  "author": "Nikita Kozlov, Kirill Korovin",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/kozlovzxc/archer/issues"
   },
   "homepage": "https://github.com/kozlovzxc/archer#readme",
   "dependencies": {
-    "casperjs": "^1.1.4",
-    "phantomjs": "^2.1.7"
+    "puppeteer": "^1.4.0"
   },
   "devDependencies": {
-    "eslint": "^4.17.0"
+    "eslint": "^4.19.1"
   }
 }
