@@ -7,16 +7,18 @@ const spider = require('./src/spider');
 const logger = require('./utils/logger')('archer');
 
 function main() {
-  const page = spider.testUrl(new URL(commander.url));
   fs
     .readdirSync(path.join(__dirname, 'scanners'))
     .forEach(file => {
-      const payload = require('./scanners/' + file);
-      page.subscribe(
-        payload,
-        err => logger.err(err),
-        () => logger.info(`${file} completed`)
-      );
+      const scanner = require('./scanners/' + file);
+      for( let generatedURL of scanner.generate(new URL(commander.url))) {
+        const page = spider.testUrl(generatedURL);
+        page.subscribe(
+          scanner.analyse,
+          err => logger.err(err),
+          () => logger.info(`${file} completed`)
+        );
+      }
     });
 }
 
