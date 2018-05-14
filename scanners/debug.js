@@ -1,4 +1,4 @@
-const logger = require('../utils/logger')('debug');
+const logger = require('../src/logger')('debug');
 
 const scanner = {
   analyze: (report) => {

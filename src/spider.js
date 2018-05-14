@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 const Rx = require('rxjs/Rx');
 
-// const logger = require('../utils/logger')('arrow');
+// const logger = require('./logger')('arrow');
 const report = require('../interfaces/report');
 const events = require('../interfaces/events');
 

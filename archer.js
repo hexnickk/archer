@@ -4,7 +4,7 @@ const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
 const spider = require('./src/spider');
-const logger = require('./utils/logger')('archer');
+const logger = require('./src/logger')('archer');
 
 function main() {
   fs

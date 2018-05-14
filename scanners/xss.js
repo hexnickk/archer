@@ -1,4 +1,4 @@
-const logger = require('../utils/logger')('debug');
+const logger = require('../src/logger')('debug');
 const events = require('../interfaces/events');
 
 const payload = '</script><script>alert(1)</script>';
