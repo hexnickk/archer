@@ -1,7 +1,8 @@
-const report = (page, message) => {
+const report = (url, event, content) => {
   return {
-    page,
-    message,
+    url,
+    event,
+    content,
   };
 };
 
