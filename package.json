@@ -19,6 +19,8 @@
   "dependencies": {
     "commander": "^2.15.1",
     "puppeteer": "^1.4.0",
+    "rxjs": "^6.1.0",
+    "rxjs-compat": "^6.1.0",
     "winston": "^3.0.0-rc5"
   },
   "devDependencies": {
