@@ -4,6 +4,9 @@ module.exports = {
     },
     "parserOptions": {
         "ecmaVersion": 8,
+        "ecmaFeatures": {
+        "experimentalObjectRestSpread": true
+        },
     },
     "extends": "eslint:recommended",
     "rules": {
