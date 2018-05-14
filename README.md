@@ -13,5 +13,5 @@ You need to install [google-chrome](https://aur.archlinux.org/packages/google-ch
 # Running
 
 ```
-npm start --silent http://example.com
+./archer.js -u http://example.com
 ```
