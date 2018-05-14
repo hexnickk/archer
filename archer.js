@@ -7,17 +7,16 @@ const spider = require('./src/spider');
 const logger = require('./utils/logger')('archer');
 
 function main() {
+  const page = spider.testUrl(new URL(commander.url));
   fs
     .readdirSync(path.join(__dirname, 'payloads'))
     .forEach(file => {
       const payload = require('./payloads/' + file);
-      spider
-        .testUrl(new URL(commander.url))
-        .subscribe(
-          payload,
-          err => logger.err(err),
-          () => logger.info(`${file} completed`)
-        );
+      page.subscribe(
+        payload,
+        err => logger.err(err),
+        () => logger.info(`${file} completed`)
+      );
     });
 }
 
