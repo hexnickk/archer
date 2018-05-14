@@ -9,9 +9,9 @@ const logger = require('./utils/logger')('archer');
 function main() {
   const page = spider.testUrl(new URL(commander.url));
   fs
-    .readdirSync(path.join(__dirname, 'payloads'))
+    .readdirSync(path.join(__dirname, 'scanners'))
     .forEach(file => {
-      const payload = require('./payloads/' + file);
+      const payload = require('./scanners/' + file);
       page.subscribe(
         payload,
         err => logger.err(err),
