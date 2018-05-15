@@ -1,13 +1,23 @@
 const puppeteer = require('puppeteer');
 const Rx = require('rxjs/Rx');
 
-// const logger = require('./logger')('arrow');
+const logger = require('./logger')('arrow');
 const config = require('../config');
 const report = require('../interfaces/report');
 const events = require('../interfaces/events');
 
 
+// const interceptAddEventListners = (elementsWithEvents) => {
+//   HTMLElement.prototype._origAddEventListener = HTMLElement.prototype.addEventListener;
+//   HTMLElement.prototype.addEventListener = function(event) {
+//     elementsWithEvents.push([this, event]);
+//     HTMLElement.prototype._origAddEventListener.apply(this, arguments);
+//   };
+// };
+
+
 const openURL = async (page, url, messageObservable) => {
+  // intercept POST, PUT, .. requests
   await page.setRequestInterception(true);
   page.on('request', interceptedRequest => {
     const method = interceptedRequest.method();
@@ -28,6 +38,7 @@ const openURL = async (page, url, messageObservable) => {
     }
   });
 
+  // catch alerts and prompts
   page.on('dialog', async dialog => {
     const eventTranslation = {
       'alert': events.AlertEvent,
@@ -43,12 +54,36 @@ const openURL = async (page, url, messageObservable) => {
     await dialog.accept();
   });
 
-  page.on('load', async () => {
+  page.on('console', async msg => {
+    logger.debug(`console message: ${msg.text()}`);
+  });
+
+  // notify every load and dom update
+  const sendDOMUpdates = async () => {
     messageObservable.next(report(
       page.url(),
-      events.PageLoadEvent,
+      events.DomUpdateEvent,
       await page.content(),
     ));
+  };
+  await page.exposeFunction('sendDOMUpdates', sendDOMUpdates);
+  await page.evaluate(() => {
+    console.log('hello');
+    const targetNode = document.body;
+    const config = {
+      attributes: true,
+      childList: true,
+      characterData: true,
+      subtree: true,
+    };
+    const callback = (mutationsList) => {
+      for(const mutation of mutationsList) {
+        console.log(mutation);
+      }
+      window.sendDOMUpdates();
+    };
+    const observer = new MutationObserver(callback);
+    observer.observe(targetNode, config);
   });
 
   await page.goto(url);

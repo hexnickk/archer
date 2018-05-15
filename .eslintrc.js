@@ -1,6 +1,7 @@
 module.exports = {
     "env": {
-        "node": true
+        "node": true,
+        "browser": true,
     },
     "parserOptions": {
         "ecmaVersion": 8,
