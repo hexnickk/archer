@@ -10,8 +10,10 @@ const scanner = {
     }
   },
   generate: (url) => {
+    const baseURL = new URL(url);
     const newURLs = [];
-    for (let name of url.searchParams.keys()) {
+    // TODO: rewrite with map
+    for (let name of baseURL.searchParams.keys()) {
       const newURL = new URL(url);
       newURL.searchParams.set(name, payload);
       newURLs.push(newURL);
