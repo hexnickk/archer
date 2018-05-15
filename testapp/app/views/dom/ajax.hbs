@@ -1,0 +1,34 @@
+<div class="container">
+  <h3>Exploitation:</h3>
+  <blockquote>Add comment with &lt;script&gt;alert(1)&lt;/script&gt;</blockquote>
+  <div class="card">
+    <div class="card-body">
+      <h4 class="card-title" id="postName">#postName</h4>
+      <p class="card-text" id="postData">#postData</p>
+    </div>
+    <ul class="list-group list-group-flush" id="interests">
+    </ul>
+  </div>
+  <form  method="POST">
+    <div class="form-group">
+      <label for="comment">Comment this post!</label>
+      <input type="text" class="form-control" id="comment" name="comment" placeholder="Enter comment...">
+    </div>
+    <button type="submit" class="btn btn-primary">Comment!</button>
+  </form>
+  <script>
+    $(document).ready(function() {
+      $.ajax({
+        url: '/dom/ajax/api/user',
+      })
+      .done(function(data){
+        $("#postName").text(data.name);
+        $("#postData").text(data.data);
+        // https://stackoverflow.com/questions/1145208/jquery-how-to-add-li-in-an-existing-ul
+        for(let comment of data.comments) {
+          $("#interests").append(`<li class="list-group-item">${comment}</li>`)
+        }
+      })
+    });
+  </script>
+</div>

@@ -1,0 +1,14 @@
+<div class="container">
+  <script>
+    function search() {
+      $('#searchQuery').html($('#searchField').val());
+    }
+  </script>
+  <h3>Exploitation</h3>
+  <blockquote>Search for: &lt;script&gt;alert(1)&lt;/script&gt;</blockquote>
+  <div class="form-group">
+    <input type="text" class="form-control" id="searchField" placeholder="Search...">
+  </div>
+  <button type="submit" class="btn btn-primary" onclick="search()">Search</button>
+  <h2>Search result for: <span id="searchQuery"></span></h2>
+</div>

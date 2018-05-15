@@ -1,0 +1,19 @@
+<div class="container">
+  <h3>Exploitation</h3>
+  <blockquote>Add post with data: &lt;script&gt;alert(1)&lt;/script&gt;</blockquote>
+  <h1>Posts</h1>
+  <form method="POST">
+    <div class="form-group">
+      <label for="postContent">Post content</label>
+      <input type="text" name="data" class="form-control" id="postContent" placeholder="Post content">
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  {{#each posts}}
+    <div class="card">
+      <div class="card-body">
+        {{{data}}}
+      </div>
+    </div>
+  {{/each}}
+</div>

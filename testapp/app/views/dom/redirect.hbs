@@ -1,0 +1,14 @@
+<div class="container">
+  <h3>Exploitation:</h3>
+  <blockquote>example.com/path?retpath=javascript:alert(1)</blockquote>
+  <div id="main">
+    Redirecting after 5 seconds...
+  </div>
+  <script>
+    var urlParams = new URLSearchParams(window.location.search);
+    var retpath = urlParams.get('retpath');
+    setTimeout(function(){
+      window.location = retpath;
+    }, 5000);
+  </script>
+</div>

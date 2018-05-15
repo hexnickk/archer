@@ -1,0 +1,137 @@
+<!-- Begin page content -->
+<main role="main" class="container mb-3">
+  <h1 class="mb-3">Reflected XSS</h1>
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Reflected XSS</h4>
+          <a href="/reflected/simple?text=text" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS inside script tag</h4>
+          <a href="/reflected/script?value=text" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS inside JSON.stringify</h4>
+          <a href="/reflected/json?text=text" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mb-3">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS inside HTML attribute</h4>
+          <a href="/reflected/attribute?attribute=http://yandex.ru" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS via redirect</h4>
+          <a href="/reflected/redirect?retpath=http://yandex.ru" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS inside cookie</h4>
+          <a href="/reflected/cookie" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h1 class="mb-3">DOM XSS</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS via url hash</h4>
+          <a href="/dom/hash#document.write('<h1>test</h1>')" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS via ajax data</h4>
+          <a href="/dom/ajax" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">XSS via redirect</h4>
+          <a href="/dom/redirect?retpath=/" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h1 class="mb-3">Stored XSS</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Simple stored xss</h4>
+          <a href="/stored/simple" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Stored XSS inside script tag</h4>
+          <a href="/stored/script" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Stored XSS inside JSON.stringify</h4>
+          <a href="/stored/json" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Stored XSS inside HTML attribute</h4>
+          <a href="/stored/attribute" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <h1 class="mb-3">Self XSS</h1>
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">SelfXSS via cookies</h4>
+          <a href="/self/cookie" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">SelfXSS &amp; DOMXSS</h4>
+          <a href="/self/input" class="btn btn-primary btn-block">Check this out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

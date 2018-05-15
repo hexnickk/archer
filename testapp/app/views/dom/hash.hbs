@@ -1,0 +1,8 @@
+<div class="container">
+  <h3>Exploitation:</h3>
+  <blockquote>example.com/path#alert(document.cookie)</blockquote>
+  <script>
+    var l = location.hash.slice(1);
+    eval(l);
+  </script>
+</div>
