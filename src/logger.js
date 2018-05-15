@@ -10,6 +10,7 @@ const logger = (name) => createLogger({
   ),
   transports: [
     new transports.File({ filename: 'logs/error.log', level: 'error' }),
+    new transports.File({ filename: 'logs/debug.log', level: 'debug' }),
     new transports.Console(),
   ]
 });
