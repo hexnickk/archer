@@ -2,12 +2,32 @@ const puppeteer = require('puppeteer');
 const Rx = require('rxjs/Rx');
 
 // const logger = require('./logger')('arrow');
-const config = require('../config/config');
+const config = require('../config');
 const report = require('../interfaces/report');
 const events = require('../interfaces/events');
 
 
 const openURL = async (page, url, messageObservable) => {
+  await page.setRequestInterception(true);
+  page.on('request', interceptedRequest => {
+    const method = interceptedRequest.method();
+    if (method != 'GET' && method != 'HEAD') {
+      messageObservable.next(report(
+        page.url(),
+        events.ChangingStateRequest,
+        {
+          url: interceptedRequest.url(),
+          method: method,
+          headers: interceptedRequest.headers(),
+          postData: interceptedRequest.postData(),
+        },
+      ));
+      interceptedRequest.abort();
+    } else {
+      interceptedRequest.continue();
+    }
+  });
+
   page.on('dialog', async dialog => {
     const eventTranslation = {
       'alert': events.AlertEvent,
