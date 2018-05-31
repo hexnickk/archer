@@ -15,48 +15,53 @@ const events = require('../interfaces/events');
 //   };
 // };
 
+const onRequest = (page, messageObservable) => (interceptedRequest) => {
+  const method = interceptedRequest.method();
+  if (method != 'GET' && method != 'HEAD') {
+    messageObservable.next(report(
+      page.url(),
+      events.ChangingStateRequest,
+      {
+        url: interceptedRequest.url(),
+        method: method,
+        headers: interceptedRequest.headers(),
+        postData: interceptedRequest.postData(),
+      },
+    ));
+    interceptedRequest.abort();
+  } else {
+    interceptedRequest.continue();
+  }
+}
+
+
+const onDialog = (page, messageObservable) => async (dialog) => {
+  const eventTranslation = {
+    'alert': events.AlertEvent,
+    'prompt': events.PromptEvent,
+    'confirm': events.ConfirmEvent,
+    'beforeunload': events.BeforeunloadEvent,
+  };
+  messageObservable.next(report(
+    page.url(),
+    eventTranslation[dialog.type()],
+    dialog.message(),
+  ));
+  await dialog.accept();
+}
+
+
+const onConsole = (page, messageObservable) => async (msg) => {
+  logger.debug(`console message: ${msg.text()}`);
+}
+
 
 const openURL = async (page, url, messageObservable) => {
   // intercept POST, PUT, .. requests
   await page.setRequestInterception(true);
-  page.on('request', interceptedRequest => {
-    const method = interceptedRequest.method();
-    if (method != 'GET' && method != 'HEAD') {
-      messageObservable.next(report(
-        page.url(),
-        events.ChangingStateRequest,
-        {
-          url: interceptedRequest.url(),
-          method: method,
-          headers: interceptedRequest.headers(),
-          postData: interceptedRequest.postData(),
-        },
-      ));
-      interceptedRequest.abort();
-    } else {
-      interceptedRequest.continue();
-    }
-  });
-
-  // catch alerts and prompts
-  page.on('dialog', async dialog => {
-    const eventTranslation = {
-      'alert': events.AlertEvent,
-      'prompt': events.PromptEvent,
-      'confirm': events.ConfirmEvent,
-      'beforeunload': events.BeforeunloadEvent,
-    };
-    messageObservable.next(report(
-      page.url(),
-      eventTranslation[dialog.type()],
-      dialog.message(),
-    ));
-    await dialog.accept();
-  });
-
-  page.on('console', async msg => {
-    logger.debug(`console message: ${msg.text()}`);
-  });
+  page.on('request', onRequest(page, messageObservable));
+  page.on('dialog', onDialog(page, messageObservable));
+  page.on('console', onConsole(page, messageObservable));
 
   // notify every load and dom update
   const sendDOMUpdates = async () => {
@@ -105,39 +110,31 @@ const createBrowser = async(messageObservable) => {
 
 const browseURL = async (url, messageObservable) => {
   const browser = await createBrowser(messageObservable);
-
   const page = await browser.newPage();
   await openURL(page, url, messageObservable);
-
   await browser.close();
 };
 
 
-const browseURLs = async (urls, messageObservable) => {
-  const browser = await createBrowser(messageObservable);
-
-  for (const url of urls) {
-    const page = await browser.newPage();
-    await openURL(page, url, messageObservable);
-  }
-
-  await browser.close();
-};
-
-
-const testURL = (url) => {
+exports.testURL = (url) => {
   const messageObservable = new Rx.Subject();
   browseURL(url, messageObservable);
   return messageObservable;
 };
 
 
-const testURLs = (urls) => {
+const browseURLs = async (urls, messageObservable) => {
+  const browser = await createBrowser(messageObservable);
+  for (const url of urls) {
+    const page = await browser.newPage();
+    await openURL(page, url, messageObservable);
+  }
+  await browser.close();
+};
+
+
+exports.testURLs = (urls) => {
   const messageObservable = new Rx.Subject();
   browseURLs(urls, messageObservable);
   return messageObservable;
 };
-
-
-exports.testURL = testURL;
-exports.testURLs = testURLs;
