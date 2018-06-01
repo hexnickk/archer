@@ -59,7 +59,12 @@ const setListners = async (page, messageObservable) => {
 
 const collectEvents = async (page, url) => {
   const events = [];
-  const collectEvent = (element, event) => events.push([element, event]);
+  const collectEvent = (element, event) => {
+    logger.debug(`found ${element} with ${event}`);
+    events.push([element, event]);
+  };
+
+  // Search for events in javascript
   await page.exposeFunction('collectEvent', collectEvent);
   await page.evaluateOnNewDocument(() => {
     HTMLElement.prototype._origAddEventListener = HTMLElement.prototype.addEventListener;
@@ -70,7 +75,7 @@ const collectEvents = async (page, url) => {
   });
 
   await page.goto(url);
-
+  // Search for events in html
   const eventsBindings = [ 'click', 'dblclick', 'mousedown', 'mousemove', 'mouseout', 'mouseover', 'mouseup',
     'change', 'focus', 'blur', 'scroll', 'select', 'submit', 'keydown', 'keypress', 'keyup' ];
   for (const event of eventsBindings) {

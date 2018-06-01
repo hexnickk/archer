@@ -9,6 +9,13 @@ const events = require('./interfaces/events');
 const logger = require('./src/logger')('archer');
 
 
+const debugObserver = (report) => {
+  const contentStr = String(report.content);
+  const content = contentStr.substr(0, 25) + (contentStr.length > 25 ? '...' : '');
+  logger.debug(`${report.event} from ${report.url} with content '${content}'`);
+};
+
+
 const requestIntercepter = (report) => {
   if (report.event == events.ChangingStateRequest) {
     const method = report.content.method;
@@ -29,6 +36,7 @@ function main() {
       const page = spider.testURLs(urls);
       page.subscribe(scanner.analyse);
       page.subscribe(requestIntercepter);
+      page.subscribe(debugObserver);
     });
 }
 
