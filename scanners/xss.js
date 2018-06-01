@@ -12,7 +12,7 @@ const scanner = {
   generate: (url) => {
     const baseURL = new URL(url);
     const newURLs = [baseURL];
-    const fileData = fs.readFileSync(path.join(__dirname, '../сonfig/payloads.json'));
+    const fileData = fs.readFileSync(path.join(__dirname, '../config/payloads.json'));
     const payloads = JSON.parse(fileData);
     // TODO: rewrite with map
     for (let name of baseURL.searchParams.keys()) {
