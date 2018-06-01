@@ -90,6 +90,8 @@ const openURL = async (page, url, messageObservable) => {
   for (const [element, event] of events) {
     logger.debug(`Dispatching ${event} on ${element}`);
     await page.evaluate((element, event) => element.dispatchEvent(new Event(event)), element, event);
+    // drop changes
+    await page.goto(url);
   }
 
   // // notify every load and dom update
