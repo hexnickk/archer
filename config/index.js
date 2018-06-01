@@ -1,6 +1,6 @@
 module.exports = {
   chrome: {
-    binary: 'google-chrome-stable',
+    binary: process.platform === 'linux' ? 'google-chrome-stable' : undefined,
     args: ['--disable-xss-auditor'],
   },
 };
