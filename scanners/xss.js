@@ -1,8 +1,10 @@
 const logger = require('../src/logger')('xss');
 const events = require('../interfaces/events');
+const path = require('path');
+const fs = require('fs');
 
-const payload = '</script><script>alert(1)</script>';
-
+const fileData = fs.readFileSync(path.join(__dirname, "../payloads.json"));
+const payloads = JSON.parse(fileData);
 const scanner = {
   analyse: (report) => {
     if (report.event === events.AlertEvent && report.content == 1) {
@@ -14,8 +16,15 @@ const scanner = {
     const newURLs = [baseURL];
     // TODO: rewrite with map
     for (let name of baseURL.searchParams.keys()) {
+      for (let payload of payloads.reflected) {
+	const newURL = new URL(url);
+        newURL.searchParams.set(name, payload);
+        newURLs.push(newURL);
+      }
+    }
+    for (let payload of payloads.hash) {
       const newURL = new URL(url);
-      newURL.searchParams.set(name, payload);
+      newURL.hash = payload;
       newURLs.push(newURL);
     }
     return newURLs;

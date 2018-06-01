@@ -1,0 +1,13 @@
+{
+  "reflected": [
+	  "<script>alert(1)</script>",
+	  "</script><script>alert(1)</script>",
+	  "somevalue</script><script>alert(1)</script>",
+	  "'><script>alert(1)</script>",
+	  "javascript:alert(1)"
+  ],
+  "hash": [
+	  "alert(document.cookie)",
+	  "alert(1)"
+  ]
+}
