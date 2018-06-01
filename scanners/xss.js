@@ -3,8 +3,6 @@ const events = require('../interfaces/events');
 const path = require('path');
 const fs = require('fs');
 
-const fileData = fs.readFileSync(path.join(__dirname, "../payloads.json"));
-const payloads = JSON.parse(fileData);
 const scanner = {
   analyse: (report) => {
     if (report.event === events.AlertEvent && report.content == 1) {
@@ -14,10 +12,12 @@ const scanner = {
   generate: (url) => {
     const baseURL = new URL(url);
     const newURLs = [baseURL];
+    const fileData = fs.readFileSync(path.join(__dirname, '../сonfig/payloads.json'));
+    const payloads = JSON.parse(fileData);
     // TODO: rewrite with map
     for (let name of baseURL.searchParams.keys()) {
       for (let payload of payloads.reflected) {
-	const newURL = new URL(url);
+        const newURL = new URL(url);
         newURL.searchParams.set(name, payload);
         newURLs.push(newURL);
       }

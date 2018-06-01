@@ -4,7 +4,7 @@
   "description": "",
   "main": "archer.js",
   "scripts": {
-    "lint": "eslint archer.js"
+    "lint": "eslint archer.js --ext .js src/ scanners/ interfaces/ config/"
   },
   "repository": {
     "type": "git",
