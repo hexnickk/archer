@@ -113,20 +113,6 @@ const collectCookies = async (page, url, messageObservable) => {
   )));
 };
 
-const fillInputs = async (page, url) => {
-  logger.debug('collecting and filling inputs');
-  const pageInputs = await page.$$('input');
-  await Promise.all(pageInputs.map((element) => element.type('test')));
-
-  const pageForms = await page.$$('form');
-  for (const pageForm of pageForms) {
-    await page.evaluate((element) => {
-      element.submit();
-    }, pageForm);
-    await page.goto(url);
-  }
-};
-
 const openURL = async (page, url, messageObservable) => {
   await setListners(page, messageObservable);
   await collectCookies(page, url, messageObservable);
@@ -157,17 +143,18 @@ const createBrowser = async (messageObservable) => {
   return browser;
 };
 
-const testURL = async (url, cookies, messageObservable) => {
+const testURL = async (url, cookies, callback, messageObservable) => {
   const browser = await createBrowser(messageObservable);
   const page = await browser.newPage();
   logger.debug(`opening ${url} with cookies ${JSON.stringify(cookies)}`);
   await Promise.all(cookies.map((cookie) => page.setCookie(cookie)));
   await openURL(page, url, messageObservable);
+  await callback(page, url, messageObservable);
   await browser.close();
 };
 
-exports.testURL = (url, cookies = []) => {
+exports.testURL = (url, cookies = [], externalHandler) => {
   const messageObservable = new Rx.Subject();
-  testURL(url, cookies, messageObservable);
+  testURL(url, cookies, externalHandler, messageObservable);
   return messageObservable;
 };

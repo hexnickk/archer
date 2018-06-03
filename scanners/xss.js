@@ -5,6 +5,19 @@ const fs = require('fs');
 
 const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/payloads.json')));
 
+const fuzzForms = async (page, url) => {
+  logger.debug('fuzzing inputs to detect dom xss');
+  const pageForms = await page.$$('form');
+  for (const pageForm of pageForms) {
+    const formInputs = await pageForm.asElement().$$('input');
+    for (const payload of payloads.reflected) {
+      await Promise.all(formInputs.map((element) => element.type(payload)));
+    }
+    await page.$eval('[onclick]', (element) => element.dispatchEvent(new Event('click')));
+    await page.goto(url);
+  }
+};
+
 const scanner = {
   analyse: (report) => {
     if (report.event === events.AlertEvent && report.content == 1) {
@@ -39,7 +52,8 @@ const scanner = {
         value: payload,
       };
     });
-  }
+  },
+  callback: async (page, url) => await fuzzForms(page, url),
 };
 
 module.exports = scanner;

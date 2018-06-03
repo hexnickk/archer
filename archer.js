@@ -54,7 +54,7 @@ function testUrl(url) {
   scanners.map((scanner) => {
     scanner
       .generateURLs(url)
-      .map((url) => spider.testURL(url))
+      .map((url) => spider.testURL(url, [], scanner.callback))
       .map((page) => {
         page.subscribe(scanner.analyse);
         page.subscribe(requestIntercepter);
