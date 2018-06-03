@@ -55,7 +55,6 @@ const setListners = async (page, messageObservable) => {
   page.on('request', onRequest(page, messageObservable));
   page.on('dialog', onDialog(page, messageObservable));
   page.on('console', onConsole(page, messageObservable));
-
 };
 
 const collectEvents = async (page, url) => {
@@ -90,10 +89,16 @@ const collectEvents = async (page, url) => {
   return events;
 };
 
-const collectLinks = async (page) => {
+const collectLinks = async (page, url, messageObservable) => {
   logger.debug('collecting links...');
-  const elements = await page.$$('a');
-  return Promise.all(elements.map((element) => element.getProperty('href')));
+  await page.goto(url);
+  const pageLinks = await page.$$('a');
+  const urls = await Promise.all(pageLinks.map(async (element) => await element.getProperty('href')));
+  urls.map(async (url) => messageObservable.next(report(
+    page.url(),
+    events.NewUrlEvent,
+    await url.jsonValue(),
+  )));
 };
 
 const collectCookies = async (page, url, messageObservable) => {
@@ -106,28 +111,28 @@ const collectCookies = async (page, url, messageObservable) => {
     events.NewCookieEvent,
     pageCookie,
   )));
+};
 
-  // subscribe to new cookies
-  await page.exposeFunction('cookiesListner', (changeInfo) => {
-    // https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/cookies/onChanged
-    if (!changeInfo.removed) {
-      messageObservable.next(report(
-        page.url(),
-        events.NewCookieEvent,
-        changeInfo.cookie
-      ));
-    }
-  });
-  await page.evaluateOnNewDocument(() => {
-    browser.cookies.onChanged.addListener(window.cookiesListner);
-  });
+const fillInputs = async (page, url) => {
+  logger.debug('collecting and filling inputs');
+  const pageInputs = await page.$$('input');
+  await Promise.all(pageInputs.map((element) => element.type('test')));
+
+  const pageForms = await page.$$('form');
+  for (const pageForm of pageForms) {
+    await page.evaluate((element) => {
+      element.submit();
+    }, pageForm);
+    await page.goto(url);
+  }
 };
 
 const openURL = async (page, url, messageObservable) => {
-  logger.debug(`opening ${url}`);
-  await collectCookies(page, url, messageObservable);
   await setListners(page, messageObservable);
+  await collectCookies(page, url, messageObservable);
+  await collectLinks(page, url, messageObservable);
   await page.goto(url);
+  // await fillInputs(page, url);
 
   const pageEvents = await collectEvents(page, url);
   for (const [pageElement, pageEvent] of pageEvents) {
@@ -137,51 +142,16 @@ const openURL = async (page, url, messageObservable) => {
     // await page.goto(url);
   }
 
-  const links = await collectLinks(page);
-  links.map(async (link) => messageObservable.next(report(
-    page.url(),
-    events.NewUrlEvent,
-    await link.jsonValue(),
-  )));
-
-  // // notify every load and dom update
-  // const sendDOMUpdates = async () => {
-  //   messageObservable.next(report(
-  //     page.url(),
-  //     events.DomUpdateEvent,
-  //     await page.content(),
-  //   ));
-  // };
-  // await page.exposeFunction('sendDOMUpdates', sendDOMUpdates);
-  // await page.evaluate(() => {
-  //   console.log('hello');
-  //   const targetNode = document.body;
-  //   const config = {
-  //     attributes: true,
-  //     childList: true,
-  //     characterData: true,
-  //     subtree: true,
-  //   };
-  //   const callback = (mutationsList) => {
-  //     for(const mutation of mutationsList) {
-  //       console.log(mutation);
-  //     }
-  //     window.sendDOMUpdates();
-  //   };
-  //   const observer = new MutationObserver(callback);
-  //   observer.observe(targetNode, config);
-  // });
-
   // let all callbacks to finish actions
-  await page.waitFor(100);
+  await page.waitFor(500);
 };
 
-const createBrowser = async(messageObservable) => {
+const createBrowser = async (messageObservable) => {
   const browser = await puppeteer.launch({
     executablePath: config.chrome.binary,
     args: config.chrome.args,
     // headless: false,
-    // slowMo: 250,
+    // slowMo: 150,
   });
   browser.on('disconnected', () => messageObservable.complete());
   return browser;
@@ -190,7 +160,8 @@ const createBrowser = async(messageObservable) => {
 const testURL = async (url, cookies, messageObservable) => {
   const browser = await createBrowser(messageObservable);
   const page = await browser.newPage();
-  cookies.map((cookie) => page.setCookie(cookie));
+  logger.debug(`opening ${url} with cookies ${JSON.stringify(cookies)}`);
+  await Promise.all(cookies.map((cookie) => page.setCookie(cookie)));
   await openURL(page, url, messageObservable);
   await browser.close();
 };

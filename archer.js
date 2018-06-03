@@ -1,8 +1,8 @@
 #! /usr/bin/env node
 
-const commander = require('commander');
 const path = require('path');
 const fs = require('fs');
+const commander = require('commander');
 
 const spider = require('./src/spider');
 const events = require('./interfaces/events');
@@ -14,9 +14,14 @@ const scanners = fs
 
 
 const debugObserver = (report) => {
-  const contentStr = String(report.content);
-  const content = contentStr.substr(0, 25) + (contentStr.length > 25 ? '...' : '');
-  logger.debug(`${report.event} from ${report.url} with content '${content}'`);
+  let contentStr;
+  if (typeof report.content !== 'string') {
+    contentStr = JSON.stringify(report.content, null, 4);
+  } else {
+    contentStr = String(report.content);
+    contentStr = contentStr.substr(0, 25) + (contentStr.length > 25 ? '...' : '');
+  }
+  logger.debug(`${report.event} from ${report.url} with content '${contentStr}'`);
 };
 
 const requestIntercepter = (report) => {
@@ -25,7 +30,7 @@ const requestIntercepter = (report) => {
     const url = report.content.url;
     const headers = JSON.stringify(report.content.headers, null, 4);
     const postData = report.content.postData;
-    logger.debug(`got changing state request:\n ${method} ${url}\n${headers}\n\n${postData}`);
+    logger.debug(`Got state changins request:\n ${method} ${url}\n${headers}\n\n${postData}`);
   }
 };
 
@@ -37,16 +42,18 @@ const cookiesObserver = (report) => {
         .map((cookie) => spider.testURL(report.url, [cookie]))
         .map((page) => {
           page.subscribe(scanner.analyse);
-          page.subscribe.debugObserver();
+          page.subscribe(debugObserver);
+          // TODO: check recursion
+          // page.subscribe(debugObserver);
         });
     });
   }
 };
 
-function main() {
+function testUrl(url) {
   scanners.map((scanner) => {
     scanner
-      .generateURLs(commander.url)
+      .generateURLs(url)
       .map((url) => spider.testURL(url))
       .map((page) => {
         page.subscribe(scanner.analyse);
@@ -57,9 +64,8 @@ function main() {
   });
 }
 
-
 commander
   .option('-u, --url <url>', 'Web site to analyse')
   .parse(process.argv);
 
-main();
+testUrl(commander.url);

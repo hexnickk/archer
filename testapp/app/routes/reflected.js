@@ -25,20 +25,17 @@ reflected.get('/redirect', (req, res) => {
 
 reflected.get('/cookie', (req, res) => {
   if (req.cookies.cookieValue === undefined) {
-    res.render('reflected/cookie', { text: 'No cookie' });
+    const cookieValue = 'foobar';
+    res.cookie('cookieValue', cookieValue);
+    res.render('reflected/cookie', { text: cookieValue });
   } else {
     res.render('reflected/cookie', { text: req.cookies.cookieValue });
   }
 });
 
 reflected.post('/cookie', (req, res) => {
-  if (req.body.cookieValue) {
-    res.cookie('cookieValue', req.body.cookieValue);
-    res.redirect(req.originalUrl);
-  } else {
-    res.redirect(req.originalUrl);
-  }
-
+  res.cookie('cookieValue', req.body.cookieValue);
+  res.redirect(req.originalUrl);
 });
 
 module.exports = reflected;
