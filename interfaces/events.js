@@ -6,3 +6,4 @@ exports.BeforeunloadEvent = 'BeforeunloadEvent';
 exports.DomUpdateEvent = 'DomUpdateEvent';
 exports.ChangingStateRequestEvent = 'ChangingStateRequestEvent';
 exports.NewUrlEvent = 'NewUrlEvent';
+exports.NewCookieEvent = 'NewCookieEvent';

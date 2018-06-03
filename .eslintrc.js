@@ -10,6 +10,9 @@ module.exports = {
         "experimentalObjectRestSpread": true
         },
     },
+    "globals": {
+        "browser": true,
+    },
     "extends": "eslint:recommended",
     "rules": {
         "indent": [

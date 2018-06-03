@@ -3,6 +3,8 @@ const events = require('../interfaces/events');
 const path = require('path');
 const fs = require('fs');
 
+const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/payloads.json')));
+
 const scanner = {
   analyse: (report) => {
     if (report.event === events.AlertEvent && report.content == 1) {
@@ -12,11 +14,9 @@ const scanner = {
       logger.info(`found xss on ${report.url}, there is redirect to javascript:`);
     }
   },
-  generate: (url) => {
+  generateURLs: (url) => {
     const baseURL = new URL(url);
     const newURLs = [baseURL];
-    const fileData = fs.readFileSync(path.join(__dirname, '../config/payloads.json'));
-    const payloads = JSON.parse(fileData);
     // TODO: rewrite with map
     for (let name of baseURL.searchParams.keys()) {
       for (let payload of payloads.reflected) {
@@ -31,6 +31,14 @@ const scanner = {
       newURLs.push(newURL);
     }
     return newURLs;
+  },
+  generateCookies: (cookie) => {
+    return payloads.reflected.map((payload) => {
+      return {
+        ...cookie,
+        value: payload,
+      };
+    });
   }
 };
 

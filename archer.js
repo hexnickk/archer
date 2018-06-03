@@ -8,13 +8,16 @@ const spider = require('./src/spider');
 const events = require('./interfaces/events');
 const logger = require('./src/logger')('archer');
 
+const scanners = fs
+  .readdirSync(path.join(__dirname, 'scanners'))
+  .map(file => require('./scanners/' + file));
+
 
 const debugObserver = (report) => {
   const contentStr = String(report.content);
   const content = contentStr.substr(0, 25) + (contentStr.length > 25 ? '...' : '');
   logger.debug(`${report.event} from ${report.url} with content '${content}'`);
 };
-
 
 const requestIntercepter = (report) => {
   if (report.event == events.ChangingStateRequestEvent) {
@@ -26,18 +29,32 @@ const requestIntercepter = (report) => {
   }
 };
 
+const cookiesObserver = (report) => {
+  if (report.event === events.NewCookieEvent) {
+    scanners.map((scanner) => {
+      scanner
+        .generateCookies(report.content)
+        .map((cookie) => spider.testURL(report.url, [cookie]))
+        .map((page) => {
+          page.subscribe(scanner.analyse);
+          page.subscribe.debugObserver();
+        });
+    });
+  }
+};
 
 function main() {
-  fs
-    .readdirSync(path.join(__dirname, 'scanners'))
-    .forEach(file => {
-      const scanner = require('./scanners/' + file);
-      const urls = scanner.generate(commander.url);
-      const page = spider.testURLs(urls);
-      page.subscribe(scanner.analyse);
-      page.subscribe(requestIntercepter);
-      page.subscribe(debugObserver);
-    });
+  scanners.map((scanner) => {
+    scanner
+      .generateURLs(commander.url)
+      .map((url) => spider.testURL(url))
+      .map((page) => {
+        page.subscribe(scanner.analyse);
+        page.subscribe(requestIntercepter);
+        page.subscribe(debugObserver);
+        page.subscribe(cookiesObserver);
+      });
+  });
 }
 
 

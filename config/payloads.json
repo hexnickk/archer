@@ -6,7 +6,6 @@
 	  "javascript:alert(1)"
   ],
   "hash": [
-	  "alert(document.cookie)",
 	  "alert(1)"
-  ]
+	]
 }
