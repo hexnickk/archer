@@ -20,7 +20,8 @@ const onRequest = (page, messageObservable) => (interceptedRequest) => {
         postData: interceptedRequest.postData(),
       },
     ));
-    interceptedRequest.abort();
+    // interceptedRequest.abort();
+    interceptedRequest.continue();
   } else {
     interceptedRequest.continue();
   }
@@ -137,7 +138,7 @@ const createBrowser = async (messageObservable) => {
     executablePath: config.chrome.binary,
     args: config.chrome.args,
     // headless: false,
-    // slowMo: 150,
+    // slowMo: 50,
   });
   browser.on('disconnected', () => messageObservable.complete());
   return browser;
@@ -153,8 +154,8 @@ const testURL = async (url, cookies, callback, messageObservable) => {
   await browser.close();
 };
 
-exports.testURL = (url, cookies = [], externalHandler) => {
+exports.testURL = (url, cookies = [], callback = () => {}) => {
   const messageObservable = new Rx.Subject();
-  testURL(url, cookies, externalHandler, messageObservable);
+  testURL(url, cookies, callback, messageObservable);
   return messageObservable;
 };

@@ -7,14 +7,35 @@ const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/payl
 
 const fuzzForms = async (page, url) => {
   logger.debug('fuzzing inputs to detect dom xss');
-  const pageForms = await page.$$('form');
-  for (const pageForm of pageForms) {
-    const formInputs = await pageForm.asElement().$$('input');
-    for (const payload of payloads.reflected) {
+  for (const payload of payloads.reflected) {
+    const pageForms = await page.$$('form');
+    for (const pageForm of pageForms) {
+      const formInputs = await pageForm.asElement().$$('input');
       await Promise.all(formInputs.map((element) => element.type(payload)));
+
+      const formButton = await pageForm.$('[onclick]');
+      if (formButton) {
+        await page.evaluate((element) => element.dispatchEvent(new Event('click')), formButton);
+        await page.waitFor(100);
+      }
     }
-    await page.$eval('[onclick]', (element) => element.dispatchEvent(new Event('click')));
     await page.goto(url);
+  }
+};
+
+const submitForms = async(page, url) => {
+  logger.debug('submiting inputs with xss payload');
+  for (const payload of payloads.reflected) {
+    const pageForm = await page.$('form');
+    if (pageForm) {
+      const formInputs = await pageForm.asElement().$$('input');
+      await Promise.all(formInputs.map((element) => element.type(payload)));
+      await page.evaluate((form) => form.submit(), pageForm);
+      await page.waitFor(100);
+      await page.goto(url);
+    } else {
+      logger.debug('No forms found');
+    }
   }
 };
 
@@ -53,7 +74,10 @@ const scanner = {
       };
     });
   },
-  callback: async (page, url) => await fuzzForms(page, url),
+  callback: async (page, url) => {
+    await fuzzForms(page, url);
+    await submitForms(page, url);
+  },
 };
 
 module.exports = scanner;
