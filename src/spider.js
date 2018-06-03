@@ -12,7 +12,7 @@ const onRequest = (page, messageObservable) => (interceptedRequest) => {
   if (method != 'GET' && method != 'HEAD') {
     messageObservable.next(report(
       page.url(),
-      events.ChangingStateRequest,
+      events.ChangingStateRequestEvent,
       {
         url: interceptedRequest.url(),
         method: method,
@@ -81,23 +81,36 @@ const collectEvents = async (page, url) => {
   for (const event of eventsBindings) {
     const elements = await page.$$(`[on${event}]`);
     for (const element of elements) {
-      collectEvent(element, event);
+      collectEvent(element.asElement(), event);
     }
   }
 
   return events;
 };
 
+const collectLinks = async (page) => {
+  const elements = await page.$$('a');
+  return Promise.all(elements.map((element) => element.getProperty('href')));
+};
+
 const openURL = async (page, url, messageObservable) => {
+  logger.debug(`opening ${url}`);
   setListners(page, messageObservable);
 
-  const events = await collectEvents(page, url);
-  for (const [element, event] of events) {
+  const pageEvents = await collectEvents(page, url);
+  for (const [element, event] of pageEvents) {
     logger.debug(`Dispatching ${event} on ${element}`);
     await page.evaluate((element, event) => element.dispatchEvent(new Event(event)), element, event);
-    // drop changes
-    await page.goto(url);
+    // TODO: drop changes
+    // await page.goto(url);
   }
+
+  const links = await collectLinks(page);
+  links.map(async (link) => messageObservable.next(report(
+    page.url(),
+    events.NewUrlEvent,
+    await link.jsonValue(),
+  )));
 
   // // notify every load and dom update
   // const sendDOMUpdates = async () => {
@@ -138,6 +151,8 @@ const createBrowser = async(messageObservable) => {
   const browser = await puppeteer.launch({
     executablePath: config.chrome.binary,
     args: config.chrome.args,
+    // headless: false,
+    // slowMo: 250,
   });
   browser.on('disconnected', () => messageObservable.complete());
   return browser;

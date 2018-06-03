@@ -17,7 +17,7 @@ const debugObserver = (report) => {
 
 
 const requestIntercepter = (report) => {
-  if (report.event == events.ChangingStateRequest) {
+  if (report.event == events.ChangingStateRequestEvent) {
     const method = report.content.method;
     const url = report.content.url;
     const headers = JSON.stringify(report.content.headers, null, 4);

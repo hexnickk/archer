@@ -8,6 +8,9 @@ const scanner = {
     if (report.event === events.AlertEvent && report.content == 1) {
       logger.info(`found xss: ${report.url}`);
     }
+    if (report.event === events.NewUrlEvent && report.content.startsWith('javascript:')) {
+      logger.info(`found xss on ${report.url}, there is redirect to javascript:`);
+    }
   },
   generate: (url) => {
     const baseURL = new URL(url);
