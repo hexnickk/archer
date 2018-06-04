@@ -1,9 +1,11 @@
 # Installation
 
-Was tested only on Arch linux
+Was tested on Arch Linux and Macbook
+
 
 ```
-npm install
+# install dependencies
+yarn
 ```
 
 ## For Arch Linux users
@@ -14,6 +16,8 @@ You need to install [google-chrome](https://aur.archlinux.org/packages/google-ch
 
 ```
 ./archer.js -u http://example.com
+# debug mode
+NODE_ENV='development' ./archer.js -u http://example.com
 ```
 
 # TestApp
