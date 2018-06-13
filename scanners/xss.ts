@@ -1,9 +1,12 @@
-const logger = require('../src/logger')('xss');
-const events = require('../interfaces/events');
-const path = require('path');
-const fs = require('fs');
+import * as path from 'path';
+import * as fs from 'fs';
+import { URL } from 'url';
 
-const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../config/payloads.json')));
+import * as events from '../interfaces/events';
+import createLogger from '../src/logger'
+const logger = createLogger('xss');
+
+const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config/payloads.json')).toString());
 
 const fuzzForms = async (page, url) => {
   logger.debug('fuzzing inputs to detect dom xss');
@@ -39,7 +42,7 @@ const submitForms = async(page, url) => {
   }
 };
 
-const scanner = {
+export default {
   analyse: (report) => {
     if (report.event === events.AlertEvent && report.content == 1) {
       logger.info(`found xss: ${report.url}`);
@@ -79,5 +82,3 @@ const scanner = {
     await submitForms(page, url);
   },
 };
-
-module.exports = scanner;

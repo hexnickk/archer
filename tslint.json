@@ -1,9 +1,14 @@
 {
     "defaultSeverity": "error",
     "extends": [
-        "tslint:recommended"
+        "tslint:recommended",
+        "rxjs-tslint-rules",
+        "tslint-microsoft-contrib"
     ],
     "jsRules": {},
-    "rules": {},
+    "rules": {
+        "missing-jsdoc": false,
+        "ordered-imports": false
+    },
     "rulesDirectory": []
 }

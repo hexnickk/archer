@@ -1,11 +1,14 @@
 const puppeteer = require('puppeteer');
-const Rx = require('rxjs/Rx');
+import { Subject } from 'rxjs';
+import { JSHandle, ElementHandle } from 'puppeteer';
 
-const logger = require('./logger')('spider');
-const config = require('../config');
-const report = require('../interfaces/report');
-const events = require('../interfaces/events');
+import config from '../config/index';
+import * as report from '../interfaces/report';
+import * as events from '../interfaces/events';
+import createLogger from './logger';
+const logger = createLogger('spider');
 
+declare var window: any;
 
 const onRequest = (page, messageObservable) => (interceptedRequest) => {
   const method = interceptedRequest.method();
@@ -69,10 +72,10 @@ const collectEvents = async (page, url) => {
   // Search for events in javascript
   await page.exposeFunction('collectEvent', collectEvent);
   await page.evaluateOnNewDocument(() => {
-    HTMLElement.prototype._origAddEventListener = HTMLElement.prototype.addEventListener;
+    const _origAddEventListener = HTMLElement.prototype.addEventListener;
     HTMLElement.prototype.addEventListener = function(event) {
       window.collectEvent(this, event);
-      HTMLElement.prototype._origAddEventListener.apply(this, arguments);
+      _origAddEventListener.apply(this, arguments);
     };
   });
 
@@ -93,8 +96,8 @@ const collectEvents = async (page, url) => {
 const collectLinks = async (page, url, messageObservable) => {
   logger.debug('collecting links...');
   await page.goto(url);
-  const pageLinks = await page.$$('a');
-  const urls = await Promise.all(pageLinks.map(async (element) => await element.getProperty('href')));
+  const pageLinks: ElementHandle[] = await page.$$('a');
+  const urls: JSHandle[] = await Promise.all(pageLinks.map(async (element) => await element.getProperty('href')));
   urls.map(async (url) => messageObservable.next(report(
     page.url(),
     events.NewUrlEvent,
@@ -154,8 +157,8 @@ const testURL = async (url, cookies, callback, messageObservable) => {
   await browser.close();
 };
 
-exports.testURL = (url, cookies = [], callback = () => {}) => {
-  const messageObservable = new Rx.Subject();
+export default (url, cookies = [], callback = () => {}) => {
+  const messageObservable = new Subject();
   testURL(url, cookies, callback, messageObservable);
   return messageObservable;
 };

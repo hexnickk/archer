@@ -1,17 +1,18 @@
 #! /usr/bin/env node
 
-const path = require('path');
-const fs = require('fs');
-const commander = require('commander');
+import * as path from 'path';
+import * as fs from 'fs';
+import * as commander from 'commander';
 
-const spider = require('./src/spider');
-const events = require('./interfaces/events');
-const logger = require('./src/logger')('archer');
+import spider from './src/spider';
+import * as events from './interfaces/events';
+import createLogger from './src/logger';
+import { exitOnError } from 'winston';
+const logger = createLogger('archer')
 
 const scanners = fs
   .readdirSync(path.join(__dirname, 'scanners'))
-  .map(file => require('./scanners/' + file));
-
+  .map(file => require('./scanners/' + file).default);
 
 const debugObserver = (report) => {
   let contentStr;
@@ -39,7 +40,7 @@ const cookiesObserver = (report) => {
     scanners.map((scanner) => {
       scanner
         .generateCookies(report.content)
-        .map((cookie) => spider.testURL(report.url, [cookie]))
+        .map((cookie) => spider(report.url, [cookie]))
         .map((page) => {
           page.subscribe(scanner.analyse);
           page.subscribe(debugObserver);
@@ -54,7 +55,7 @@ function testUrl(url) {
   scanners.map((scanner) => {
     scanner
       .generateURLs(url)
-      .map((url) => spider.testURL(url, [], scanner.callback))
+      .map((url) => spider(url, [], scanner.callback))
       .map((page) => {
         page.subscribe(scanner.analyse);
         page.subscribe(requestIntercepter);
