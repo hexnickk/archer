@@ -1,10 +1,10 @@
-const puppeteer = require('puppeteer');
+import * as puppeteer from 'puppeteer';
 import { Subject } from 'rxjs';
 import { JSHandle, ElementHandle } from 'puppeteer';
 
-import config from '../config/index';
-import * as report from '../interfaces/report';
-import * as events from '../interfaces/events';
+import config from '../../config/index';
+import report from '../interfaces/report';
+import events from '../interfaces/events';
 import createLogger from './logger';
 const logger = createLogger('spider');
 
@@ -12,13 +12,13 @@ declare var window: any;
 
 const onRequest = (page, messageObservable) => (interceptedRequest) => {
   const method = interceptedRequest.method();
-  if (method != 'GET' && method != 'HEAD') {
+  if (method !== 'GET' && method !== 'HEAD') {
     messageObservable.next(report(
       page.url(),
       events.ChangingStateRequestEvent,
       {
         url: interceptedRequest.url(),
-        method: method,
+        method,
         headers: interceptedRequest.headers(),
         postData: interceptedRequest.postData(),
       },
@@ -32,10 +32,10 @@ const onRequest = (page, messageObservable) => (interceptedRequest) => {
 
 const onDialog = (page, messageObservable) => (dialog) => {
   const eventTranslation = {
-    'alert': events.AlertEvent,
-    'prompt': events.PromptEvent,
-    'confirm': events.ConfirmEvent,
-    'beforeunload': events.BeforeunloadEvent,
+    alert: events.AlertEvent,
+    prompt: events.PromptEvent,
+    confirm: events.ConfirmEvent,
+    beforeunload: events.BeforeunloadEvent,
   };
   messageObservable.next(report(
     page.url(),
@@ -49,7 +49,7 @@ const onConsole = (page, messageObservable) => (msg) => {
   messageObservable.next(report(
     page.url(),
     events.ConsoleMessageEvent,
-    msg.text()
+    msg.text(),
   ));
 };
 
@@ -63,19 +63,19 @@ const setListners = async (page, messageObservable) => {
 
 const collectEvents = async (page, url) => {
   logger.debug('collecting events...');
-  const events = [];
+  const collectedEvents = [];
   const collectEvent = (element, event) => {
     logger.debug(`found ${element} with ${event}`);
-    events.push([element, event]);
+    collectedEvents.push([element, event]);
   };
 
   // Search for events in javascript
   await page.exposeFunction('collectEvent', collectEvent);
   await page.evaluateOnNewDocument(() => {
-    const _origAddEventListener = HTMLElement.prototype.addEventListener;
+    const origAddEventListener = HTMLElement.prototype.addEventListener;
     HTMLElement.prototype.addEventListener = function(event) {
       window.collectEvent(this, event);
-      _origAddEventListener.apply(this, arguments);
+      origAddEventListener.apply(this, arguments);
     };
   });
 
@@ -90,12 +90,12 @@ const collectEvents = async (page, url) => {
     }
   }
 
-  return events;
+  return collectedEvents;
 };
 
-const collectLinks = async (page, url, messageObservable) => {
+const collectLinks = async (page, pageUrl, messageObservable) => {
   logger.debug('collecting links...');
-  await page.goto(url);
+  await page.goto(pageUrl);
   const pageLinks: ElementHandle[] = await page.$$('a');
   const urls: JSHandle[] = await Promise.all(pageLinks.map(async (element) => await element.getProperty('href')));
   urls.map(async (url) => messageObservable.next(report(

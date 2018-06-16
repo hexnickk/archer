@@ -1,18 +1,15 @@
-#! /usr/bin/env node
-
-import * as path from 'path';
-import * as fs from 'fs';
 import * as commander from 'commander';
 
-import spider from './src/spider';
-import * as events from './interfaces/events';
-import createLogger from './src/logger';
-import { exitOnError } from 'winston';
-const logger = createLogger('archer')
+import spider from './utils/spider';
+import events from './interfaces/events';
+import createLogger from './utils/logger';
+const logger = createLogger('archer');
 
-const scanners = fs
-  .readdirSync(path.join(__dirname, 'scanners'))
-  .map(file => require('./scanners/' + file).default);
+import xssScanner from './scanners/xss';
+
+const scanners: any[] = [
+  xssScanner,
+];
 
 const debugObserver = (report) => {
   let contentStr;
@@ -26,7 +23,7 @@ const debugObserver = (report) => {
 };
 
 const requestIntercepter = (report) => {
-  if (report.event == events.ChangingStateRequestEvent) {
+  if (report.event === events.ChangingStateRequestEvent) {
     const method = report.content.method;
     const url = report.content.url;
     const headers = JSON.stringify(report.content.headers, null, 4);
@@ -55,7 +52,7 @@ function testUrl(url) {
   scanners.map((scanner) => {
     scanner
       .generateURLs(url)
-      .map((url) => spider(url, [], scanner.callback))
+      .map((generatedURL) => spider(generatedURL, [], scanner.callback))
       .map((page) => {
         page.subscribe(scanner.analyse);
         page.subscribe(requestIntercepter);

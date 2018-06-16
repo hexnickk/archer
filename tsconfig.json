@@ -1,23 +1,14 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "allowJs": true,
     "target": "es5",
     "lib": [
       "es2015",
       "dom"
     ],
+    "moduleResolution": "node",
     "downlevelIteration": true,
-    "moduleResolution": "node"
-  },
-  "include": [
-    "./src/**/*",
-    "./scanners/**/*",
-    "./config/**/*",
-    "./archer.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ]
+    "sourceMap": true
+    // "noImplicitAny": true
+  }
 }

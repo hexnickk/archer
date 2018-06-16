@@ -2,13 +2,15 @@
     "defaultSeverity": "error",
     "extends": [
         "tslint:recommended",
-        "rxjs-tslint-rules",
-        "tslint-microsoft-contrib"
+        "rxjs-tslint-rules"
     ],
     "jsRules": {},
     "rules": {
         "missing-jsdoc": false,
-        "ordered-imports": false
+        "ordered-imports": false,
+        "quotemark": [true, "single"],
+        "object-literal-sort-keys": false,
+        "no-empty": [true, "allow-empty-functions"]
     },
     "rulesDirectory": []
 }

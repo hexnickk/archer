@@ -2,11 +2,21 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { URL } from 'url';
 
-import * as events from '../interfaces/events';
-import createLogger from '../src/logger'
+import events from '../interfaces/events';
+import createLogger from '../utils/logger';
 const logger = createLogger('xss');
 
-const payloads = JSON.parse(fs.readFileSync(path.join(__dirname, '../../config/payloads.json')).toString());
+const payloads = {
+  reflected: [
+    '<script>alert(1)</script>',
+    '</script><script>alert(1)</script>',
+    '"\'><script>alert(1)</script>',
+    'javascript:alert(1)',
+  ],
+  hash: [
+    'alert(1)',
+  ],
+};
 
 const fuzzForms = async (page, url) => {
   logger.debug('fuzzing inputs to detect dom xss');
@@ -26,7 +36,7 @@ const fuzzForms = async (page, url) => {
   }
 };
 
-const submitForms = async(page, url) => {
+const submitForms = async (page, url) => {
   logger.debug('submiting inputs with xss payload');
   for (const payload of payloads.reflected) {
     const pageForm = await page.$('form');
@@ -44,7 +54,7 @@ const submitForms = async(page, url) => {
 
 export default {
   analyse: (report) => {
-    if (report.event === events.AlertEvent && report.content == 1) {
+    if (report.event === events.AlertEvent && report.content === 1) {
       logger.info(`found xss: ${report.url}`);
     }
     if (report.event === events.NewUrlEvent && report.content.startsWith('javascript:')) {
@@ -55,14 +65,14 @@ export default {
     const baseURL = new URL(url);
     const newURLs = [baseURL];
     // TODO: rewrite with map
-    for (let name of baseURL.searchParams.keys()) {
-      for (let payload of payloads.reflected) {
+    for (const name of baseURL.searchParams.keys()) {
+      for (const payload of payloads.reflected) {
         const newURL = new URL(url);
         newURL.searchParams.set(name, payload);
         newURLs.push(newURL);
       }
     }
-    for (let payload of payloads.hash) {
+    for (const payload of payloads.hash) {
       const newURL = new URL(url);
       newURL.hash = payload;
       newURLs.push(newURL);
